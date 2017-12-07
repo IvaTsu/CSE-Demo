@@ -1,0 +1,222 @@
+<html>
+<head>
+	<title>CTP DEMO Navigation</title>
+	<style>
+
+		#map {
+	        width: 100%;
+	        height: 800px;
+	        background-color: grey;
+        }
+
+		/* Center the loader */
+		#loader {
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			z-index: 1;
+			width: 150px;
+			height: 150px;
+			margin: -75px 0 0 -75px;
+			border: 16px solid #f3f3f3;
+			border-radius: 50%;
+			border-top: 16px solid #3498db;
+			width: 120px;
+			height: 120px;
+			-webkit-animation: spin 2s linear infinite;
+			animation: spin 2s linear infinite;
+		}
+
+		@-webkit-keyframes spin {
+			0% { -webkit-transform: rotate(0deg); }
+			100% { -webkit-transform: rotate(360deg); }
+		}
+
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+
+		/* Add animation to "page content" */
+		.animate-bottom {
+			position: relative;
+			-webkit-animation-name: animatebottom;
+			-webkit-animation-duration: 1s;
+			animation-name: animatebottom;
+			animation-duration: 1s
+		}
+
+		@-webkit-keyframes animatebottom {
+			from { bottom:-100px; opacity:0 } 
+			to { bottom:0px; opacity:1 }
+		}
+
+		@keyframes animatebottom { 
+			from{ bottom:-100px; opacity:0 } 
+			to{ bottom:0; opacity:1 }
+		}
+
+		#spin {
+			display: none;
+			text-align: center;
+		}
+
+	</style>
+</head>
+<body onload="doSpin()" style="margin:0;">
+
+	<div id="loader"></div>
+	<div style="display:none;" id="spin" class="animate-bottom"></div>
+		
+	<script src="https://cdn.jsdelivr.net/particle-api-js/5/particle.min.js"></script>
+	<script>
+
+		var timeout;
+
+		function doSpin() {
+		    timeout = setTimeout(showPage, 300);
+		}
+
+		function showPage() {
+		  document.getElementById("loader").style.display = "none";
+		  document.getElementById("spin").style.display = "block";
+		}
+
+
+		var particle = new Particle();
+		var token = "8801cd75ebfde7955dcacf947f9264f4ec5a18a8";
+		var DEVICE_ID = "20004b000a51353335323536";
+		var status;
+		var latitude;
+		var longitude;
+		var statusNode = document.createElement("LI");
+		var node1 = document.createElement("LI");
+		var node2 = document.createElement("LI");
+		var textnode1;
+		var textnode2;
+		var boolnode;
+		var uluru;
+
+		particle.login({ username: 'khuldoonbukharihats@gmail.com', password: '9Tt-t9Z-eQz-gWB' })
+			.then(function(result) {
+				console.log('Your access token', result.body.access_token);
+			}, function(err) {
+				console.error(err);
+		});
+
+		var devicesPr = particle.getDevice({ deviceId: DEVICE_ID, auth: token });
+
+		devicesPr.then(
+		  function(data){
+		    console.log('Device attrs retrieved successfully:', data);
+		  },
+		  function(err) {
+		    console.log('API call failed: ', err);
+		  }
+		);
+
+		particle.getVariable({ deviceId: DEVICE_ID, name: 'boolean', auth: token }).then(function(data) {
+		  console.log('Device variable retrieved successfully:', data);
+		  status = data.body.result;
+		  console.log(status + "status");
+		  if (status == 1) {
+		  	boolnode = document.createTextNode("System is ON");
+		  	statusNode.appendChild(boolnode);
+		  	document.getElementById("spin").appendChild(statusNode);
+
+		  	particle.getVariable({ deviceId: DEVICE_ID, name: 'latitude', auth: token }).then(function(data) {
+			  console.log('Device variable retrieved successfully:', data);
+			  latitude = parseFloat(data.body.result);
+			  textnode1 = document.createTextNode(latitude + " - latitude");
+			  node1.appendChild(textnode1);
+			  document.getElementById("spin").appendChild(node1);
+
+			  console.log(data.body.result);
+				particle.getVariable({ deviceId: DEVICE_ID, name: 'longitude', auth: token }).then(function(data) {
+					console.log('Device variable retrieved successfully:', data);
+
+					longitude = data.body.result;
+					uluru = {lat: latitude, lng: longitude};
+					textnode2 = document.createTextNode(longitude + " - longitude");
+					node2.appendChild(textnode2);
+					document.getElementById("spin").appendChild(node2);
+
+					console.log(data.body.result);
+					console.log(uluru);
+
+					var map = '<div id="map"></div>',
+					div = document.getElementById('spin');
+
+					div.insertAdjacentHTML( 'beforeend', map );
+					initMap(uluru);
+
+				}, function(err) {
+			  		console.log('An error occurred while getting attrs:', err);
+				});
+			}, function(err) {
+			  console.log('An error occurred while getting attrs:', err);
+			});
+		  } else {
+		  		boolnode = document.createTextNode("System is OFF");
+		  		statusNode.appendChild(boolnode);
+		  		document.getElementById("spin").appendChild(statusNode);
+
+		  		particle.getVariable({ deviceId: DEVICE_ID, name: 'latitude', auth: token }).then(function(data) {
+			  console.log('Device variable retrieved successfully:', data);
+			  latitude = parseFloat(data.body.result);
+			  textnode1 = document.createTextNode(latitude + " - latitude");
+			  node1.appendChild(textnode1);
+			  document.getElementById("spin").appendChild(node1);
+
+			  console.log(data.body.result);
+				particle.getVariable({ deviceId: DEVICE_ID, name: 'longitude', auth: token }).then(function(data) {
+					console.log('Device variable retrieved successfully:', data);
+
+					longitude = data.body.result;
+					uluru = {lat: latitude, lng: longitude};
+					textnode2 = document.createTextNode(longitude + " - longitude");
+					node2.appendChild(textnode2);
+					document.getElementById("spin").appendChild(node2);
+
+					console.log(data.body.result);
+					console.log(uluru);
+
+				}, function(err) {
+			  		console.log('An error occurred while getting attrs:', err);
+				});
+			}, function(err) {
+			  console.log('An error occurred while getting attrs:', err);
+			});
+		  }
+		  console.log(data.body.result)
+		}, function(err) {
+		  console.log('An error occurred while getting attrs:', err);
+		});
+
+	</script>
+	<script type="text/javascript">
+		function initMap(uluru) {
+		        var map = new google.maps.Map(document.getElementById('map'), {
+		          zoom: 15,
+		          center: uluru
+		        });
+		        var marker = new google.maps.Marker({
+		          position: uluru,
+		          map: map
+		        });
+		        
+
+		        var marker2 = new google.maps.Marker({
+		          position: {lat: 59.405957, lng: 24.668255},
+		          icon: 'https://cdn4.iconfinder.com/data/icons/car-silhouettes/1000/van-64.png',
+		          map: map
+
+		        });
+      		}
+	</script>
+	
+	<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBIggtwbvXkIzq1EqWexOZjySTKhmCxf5o&callback=initMap">
+    </script>
+</body>
+</html>
